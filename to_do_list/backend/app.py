@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 
 
 #create object for the backend
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Super2314@localhost:5432/taskmanager'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -35,7 +37,7 @@ def create_task():
     
     #if data doesnt have title name
     if not data or 'title' not in data:
-        return jsonify({'error': "Title is required"}), 404
+        return jsonify({'error': "Title is required"}), 400
     
     #create task
     new_task = Task(title = data['title'],
@@ -76,8 +78,8 @@ def get_tasks():
     task = Task.query.all()
     
     return jsonify([{'id': t.id, 
-                     'Title' : t.title, 
-                     'Completed' : t.completed
+                     'title': t.title, 
+                     'completed': t.completed
                      } for t in task]), 200
 
 #put endoint
@@ -102,3 +104,8 @@ def update_task(task_id):
             'completed': task.completed
         }
     }), 200
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
